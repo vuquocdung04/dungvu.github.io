@@ -296,9 +296,11 @@ footer{text-align:center;font-size:11px;color:var(--soft);padding:2px 0}
 <div class="wrap">
 
   <div class="editbar" id="editbar">
-    <div class="lbl">✎ <b>Edit mode</b> — click any card, studio or the header to edit. Changes are saved in this browser.</div>
+    <div class="lbl">✎ <b>Edit mode</b> — click any card, studio or the header to edit. <b>Save to project</b> writes index.html + images/ — then just push.</div>
     <button class="ebtn" data-act="studio">+ Studio</button>
     <button class="ebtn" data-act="data">Export / Import</button>
+    <button class="ebtn pri" data-act="save">Save to project</button>
+    <div id="saveStatus" style="flex-basis:100%;font-size:12px;font-family:'IBM Plex Mono',monospace;display:none"></div>
     <button class="ebtn pri" data-act="done">Done</button>
   </div>
 
@@ -368,43 +370,108 @@ footer{text-align:center;font-size:11px;color:var(--soft);padding:2px 0}
 /* ============================================================
    DEFAULT DATA — what visitors see.
    To update the live site: open #edit, make changes, click
-   "Export / Import" → Copy, and paste over this object.
+   "Save to project" (Chrome/Edge) — it rewrites this object and
+   writes pasted images to images/. Then commit + push.
+   Do not remove the DATA / END markers around this object.
    ============================================================ */
-const DEFAULT_DATA = {
+const DEFAULT_DATA = /*@DATA*/{
   "profile": {
-    "name": "Dung Vu", "initials": "DV",
-    "photo": "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' fill='%23e0a526'/><circle cx='50' cy='50' r='34' fill='%23f2d48a'/><circle cx='50' cy='40' r='15' fill='%232a2420'/><path d='M22 86c4-16 15-24 28-24s24 8 28 24' fill='%232a2420'/><circle cx='50' cy='40' r='15' fill='none' stroke='%23f7f1e3' stroke-width='2.5'/></svg>",
+    "name": "Dung Vu",
+    "initials": "DV",
+    "photo": "images/dung-vu-5d34127b0018.webp",
     "role": "Unity Developer",
     "subtitle": "Mobile casual & puzzle games",
     "careerStart": "2026-02",
     "school": "Hanoi University of Education · 2022–2026",
-    "email": "vuquocdung204@gmail.com", "phone": "0862 508 930", "location": "Hanoi, VN"
+    "email": "vuquocdung204@gmail.com",
+    "phone": "0862 508 930",
+    "location": "Hanoi, VN",
+    "photoPos": "33.7% 31.9%",
+    "photoZoom": 1.2,
+    "photoW": 125,
+    "photoH": 157
   },
   "studios": [
-    { "company": "JoyBoy Game", "period": "08/2026 — Present", "games": [
-      { "name": "Cozy Drink Match", "downloads": "1K+" }
-    ]},
-    { "company": "CMz Soft", "period": "01/2026 — 08/2026", "games": [
-      { "name": "Marble Away!", "downloads": "3K+" },
-      { "name": "Food Sort: Dessert & Tea", "downloads": "1K+" },
-      { "name": "Jelly Jam", "downloads": "100+" },
-      { "name": "Fill The Car!", "downloads": "10+" },
-      { "name": "Arrow Craze", "note": "Unreleased" }
-    ]}
+    {
+      "company": "JoyBoy Game",
+      "period": "08/2026 — Present",
+      "games": [
+        {
+          "name": "Cozy Drink Match",
+          "downloads": "1K+"
+        }
+      ]
+    },
+    {
+      "company": "CMz Soft",
+      "period": "01/2026 — 08/2026",
+      "games": [
+        {
+          "name": "Marble Away!",
+          "downloads": "3K+"
+        },
+        {
+          "name": "Food Sort: Dessert & Tea",
+          "downloads": "1K+"
+        },
+        {
+          "name": "Jelly Jam",
+          "downloads": "100+"
+        },
+        {
+          "name": "Fill The Car!",
+          "downloads": "10+"
+        },
+        {
+          "name": "Arrow Craze",
+          "note": "Unreleased"
+        }
+      ]
+    }
   ],
   "side": [
-    { "name": "Colony", "store": true },
-    { "name": "Pixel Flow", "store": true },
-    { "name": "Yarn Color 3D", "note": "07/2026" },
-    { "name": "We Are Warriors", "note": "Strategy" },
-    { "name": "Rotate Rings", "note": "Demo" },
-    { "name": "Top Down Shooter", "note": "Shooter" },
-    { "name": "Match Factory", "note": "Match 3D" },
-    { "name": "Connect Tower", "note": "Puzzle" },
-    { "name": "Dreamy Room", "note": "Decor" },
-    { "name": "Satismoment", "note": "Casual" }
+    {
+      "name": "Colony",
+      "store": true
+    },
+    {
+      "name": "Pixel Flow",
+      "store": true
+    },
+    {
+      "name": "Yarn Color 3D",
+      "note": "07/2026"
+    },
+    {
+      "name": "We Are Warriors",
+      "note": "Strategy"
+    },
+    {
+      "name": "Rotate Rings",
+      "note": "Demo"
+    },
+    {
+      "name": "Top Down Shooter",
+      "note": "Shooter"
+    },
+    {
+      "name": "Match Factory",
+      "note": "Match 3D"
+    },
+    {
+      "name": "Connect Tower",
+      "note": "Puzzle"
+    },
+    {
+      "name": "Dreamy Room",
+      "note": "Decor"
+    },
+    {
+      "name": "Satismoment",
+      "note": "Casual"
+    }
   ]
-};
+}/*@END*/;
 
 const KEY = "dv-portfolio-v1";
 const $ = id => document.getElementById(id);
@@ -418,7 +485,7 @@ function normalize(d){
 }
 let DATA = normalize(load());
 function load(){ try{ const s=localStorage.getItem(KEY); if(s) return JSON.parse(s); }catch(e){} return clone(DEFAULT_DATA); }
-function persist(){ try{ localStorage.setItem(KEY, JSON.stringify(DATA)); }catch(e){ toast("Browser storage is full — use Export to back up"); } render(); }
+function persist(){ try{ localStorage.setItem(KEY, JSON.stringify(DATA)); }catch(e){ toast("Browser storage is full — click Save to project"); } render(); if(typeof autoSync==="function") autoSync(); }
 function toast(t){ const el=$("toast"); el.textContent=t; el.classList.add("on"); clearTimeout(toast.t); toast.t=setTimeout(()=>el.classList.remove("on"),1600); }
 const esc = s => String(s??"").replace(/[&<>"]/g, c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
 
@@ -464,6 +531,7 @@ $("editbar").addEventListener("click", e=>{
   if(a==="done") setEdit(false);
   if(a==="studio") studioForm(-1);
   if(a==="data") dataForm();
+  if(a==="save") saveProject();
 });
 $("hdr").addEventListener("click", e=>{ if(EDIT && !justResized && !e.target.closest("a,.rz,.cp")) profileForm(); });
 $("pHire").addEventListener("click", e=>{ if(EDIT){ e.preventDefault(); profileForm(); } });
@@ -884,6 +952,105 @@ function dataForm(){
   armed($("dReset"),"Click again to reset",()=>{ DATA=clone(DEFAULT_DATA); try{localStorage.removeItem(KEY)}catch(e){} closeForm(); render(); toast("Reset"); });
   fo.classList.add("open");
 }
+
+/* ============================================================
+   SAVE TO PROJECT (Chrome / Edge — File System Access API)
+   Pick the repo folder once; afterwards every save writes
+   pasted images to images/<name>-<hash>.webp and rewrites
+   DEFAULT_DATA inside index.html. Unused images are removed.
+   ============================================================ */
+const MK_A="/*@"+"DATA*/", MK_B="/*@"+"END*/";
+const IDB={
+  db:null,
+  open(){ return this.db||(this.db=new Promise((res,rej)=>{ const r=indexedDB.open("dv-portfolio-fs",1); r.onupgradeneeded=()=>r.result.createObjectStore("kv"); r.onsuccess=()=>res(r.result); r.onerror=()=>rej(r.error); })); },
+  async get(k){ const db=await this.open(); return new Promise((res,rej)=>{ const q=db.transaction("kv").objectStore("kv").get(k); q.onsuccess=()=>res(q.result); q.onerror=()=>rej(q.error); }); },
+  async set(k,v){ const db=await this.open(); return new Promise((res,rej)=>{ const t=db.transaction("kv","readwrite"); t.objectStore("kv").put(v,k); t.oncomplete=()=>res(); t.onerror=()=>rej(t.error); }); }
+};
+const slug=s=>String(s||"").normalize("NFD").replace(/\p{M}/gu,"").replace(/đ/gi,"d").toLowerCase().replace(/[^a-z0-9]+/g,"-").replace(/^-+|-+$/g,"").slice(0,40)||"img";
+async function readIndex(dir){
+  try{ const fh=await dir.getFileHandle("index.html"); const t=await (await fh.getFile()).text();
+    return t.includes(MK_A)&&t.includes(MK_B)?{fh,t}:null; }catch(e){ return null; }
+}
+async function fileExists(dir,name){ try{ await dir.getFileHandle(name); return true; }catch(e){ return false; } }
+async function writeFile(dir,name,data){ const w=await (await dir.getFileHandle(name,{create:true})).createWritable(); await w.write(data); await w.close(); }
+
+function setStatus(msg,isErr){ const el=$("saveStatus"); if(!el) return; el.style.display=msg?"":"none"; el.style.color=isErr?"#ff8a73":"var(--gold)"; el.textContent=msg||""; }
+let DIR_MEM=null;
+/* the picked folder may be the repo itself or its parent — find index.html either way */
+async function findIndex(dir){
+  let idx=await readIndex(dir); if(idx) return {dir,idx};
+  for await(const [n,h] of dir.entries()) if(h.kind==="directory"){ idx=await readIndex(h); if(idx) return {dir:h,idx}; }
+  return null;
+}
+/* interactive=true may show the folder picker / permission prompt (needs a click) */
+async function getProjectDir(interactive){
+  let dir=DIR_MEM; if(!dir) try{ dir=await IDB.get("dir"); }catch(e){ console.warn("IndexedDB read failed",e); }
+  if(dir){
+    let p=await dir.queryPermission({mode:"readwrite"});
+    if(p!=="granted" && interactive) p=await dir.requestPermission({mode:"readwrite"});
+    if(p!=="granted") dir=null;
+  }
+  let found=dir?await findIndex(dir):null;
+  if(!found){
+    if(!interactive) return null;
+    const picked=await showDirectoryPicker({id:"dv-portfolio",mode:"readwrite"});
+    found=await findIndex(picked);
+    if(!found) throw new Error(`Folder "${picked.name}" has no index.html with the data markers — pick the dungvu.github.io folder.`);
+    try{ await IDB.set("dir",found.dir); }catch(e){ console.warn("IndexedDB write failed (folder kept for this session only)",e); }
+  }
+  DIR_MEM=found.dir;
+  return found;
+}
+
+let saving=false, saveAgain=false;
+async function saveProject(interactive=true){
+  if(!window.showDirectoryPicker){ if(interactive) toast("Save to project needs Chrome or Edge — use Export instead"); return; }
+  if(saving){ saveAgain=true; return; }
+  saving=true; const btn=document.querySelector('[data-act="save"]'); if(btn) btn.textContent="Saving…";
+  try{
+    const proj=await getProjectDir(interactive); if(!proj) return;
+    const {dir,idx}=proj, imgDir=await dir.getDirectoryHandle("images",{create:true});
+    const data=clone(DATA), map=new Map(), used=new Set(); let added=0;
+    const walk=async(o,label)=>{ for(const k of Object.keys(o)){ const v=o[k];
+      if(typeof v==="string"){
+        const m=/^data:image\/(webp|jpeg|png|gif);base64,/.exec(v);
+        if(!m){ const p=/^images\/([^/?#]+)$/.exec(v); if(p) used.add(p[1]); continue; }
+        if(!map.has(v)){
+          const bytes=await (await fetch(v)).arrayBuffer();
+          const h=[...new Uint8Array(await crypto.subtle.digest("SHA-256",bytes))].slice(0,6).map(b=>b.toString(16).padStart(2,"0")).join("");
+          const name=`${slug(label)}-${h}.${m[1]==="jpeg"?"jpg":m[1]}`;
+          if(!(await fileExists(imgDir,name))){ await writeFile(imgDir,name,bytes); added++; }
+          map.set(v,"images/"+name);
+        }
+        o[k]=map.get(v); used.add(map.get(v).slice(7));
+      } else if(v&&typeof v==="object") await walk(v, v.name||v.company||label);
+    }};
+    await walk(data,"img");
+    // remove images this tool created that nothing references any more
+    const stale=[]; for await(const [n,h] of imgDir.entries()) if(h.kind==="file" && /-[0-9a-f]{12}\.(webp|jpg|png|gif)$/.test(n) && !used.has(n)) stale.push(n);
+    for(const n of stale) await imgDir.removeEntry(n);
+    // rewrite DEFAULT_DATA in index.html
+    const a=idx.t.indexOf(MK_A)+MK_A.length, b=idx.t.indexOf(MK_B);
+    const out=idx.t.slice(0,a)+JSON.stringify(data,null,2).replace(/</g,"\\u003c")+idx.t.slice(b);
+    const changed=out!==idx.t; if(changed) await writeFile(dir,"index.html",out);
+    // swap data URLs for file paths in the live data (keeps edits made while saving)
+    const swap=o=>{ for(const k of Object.keys(o)){ const v=o[k]; if(typeof v==="string"&&map.has(v)) o[k]=map.get(v); else if(v&&typeof v==="object") swap(v); } };
+    swap(DATA); try{ localStorage.setItem(KEY, JSON.stringify(DATA)); }catch(e){} render();
+    const parts=[]; if(added) parts.push(`${added} image${added>1?"s":""} added`); if(stale.length) parts.push(`${stale.length} removed`);
+    const msg=changed||added||stale.length ? `✓ Saved to ${dir.name}${parts.length?" — "+parts.join(", "):""} · ready to push` : `✓ ${dir.name} already up to date`;
+    toast(msg); setStatus(msg+"  ("+new Date().toLocaleTimeString()+")");
+  }catch(e){
+    if(e&&e.name==="AbortError") toast("Cancelled");
+    else { console.error(e); const msg="✗ Save failed: "+(e&&e.name?e.name+" — ":"")+(e&&e.message?e.message:String(e)); toast(msg); setStatus(msg,true); }
+  }finally{
+    saving=false; if(btn) btn.textContent="Save to project";
+    if(saveAgain){ saveAgain=false; saveProject(false); }
+  }
+}
+/* after the folder is linked, every edit syncs to disk automatically */
+let syncT=null;
+function autoSync(){ if(!EDIT||!window.showDirectoryPicker) return; clearTimeout(syncT); syncT=setTimeout(()=>saveProject(false),500); }
+addEventListener("keydown",e=>{ if(EDIT && (e.ctrlKey||e.metaKey) && e.key.toLowerCase()==="s"){ e.preventDefault(); saveProject(true); } });
 
 render();
 </script>
